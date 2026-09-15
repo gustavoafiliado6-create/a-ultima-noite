@@ -20,6 +20,18 @@ export class AmbientAudio {
     await this.context.resume(); this.setActive(true);
   }
   setActive(active) { if (this.context) this.master.gain.setTargetAtTime(active && this.enabled ? .32 : 0, this.context.currentTime, .1); }
+  presence(kind = 'wind') {
+    if (!this.context || !this.enabled || this.context.state !== 'running') return;
+    const ctx = this.context, now = ctx.currentTime, duration = kind === 'step' ? .22 : 2.8;
+    const source = ctx.createBufferSource(); source.buffer = this.noise;
+    const filter = ctx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = kind === 'step' ? 210 : 105;
+    filter.Q.value = .6;
+    const gain = ctx.createGain(); gain.gain.setValueAtTime(.001, now);
+    gain.gain.linearRampToValueAtTime(kind === 'transition' ? .12 : .06, now + duration * .3);
+    gain.gain.exponentialRampToValueAtTime(.001, now + duration);
+    source.connect(filter).connect(gain).connect(this.master); source.start(now); source.stop(now + duration);
+    source.onended = () => { source.disconnect(); filter.disconnect(); gain.disconnect(); };
+  }
   step(distance, moving) {
     if (!this.context || !moving || distance - this.lastStep < 1.35) return;
     this.lastStep = distance;

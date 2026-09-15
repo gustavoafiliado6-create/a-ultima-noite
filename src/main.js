@@ -6,6 +6,7 @@ import { AmbientAudio } from './audio.js';
 import { Inventory } from './inventory.js';
 import { ITEMS, createCollectibles } from './collectibles.js';
 import { CollectionSystem, collectionUI } from './interaction.js';
+import { MonsterSystem } from './monsterAI.js';
 
 const canvas = document.querySelector('#game');
 const menu = document.querySelector('#menu');
@@ -30,11 +31,21 @@ try {
   const collection = new CollectionSystem(scene, camera, collectibles, inventory, collectionUI());
   const audio = new AmbientAudio();
   let started = false, active = false, elapsed = 0, previous = performance.now();
+  let ended = false;
+  const gameOver = document.querySelector('#game-over');
+  const monster = new MonsterSystem(scene, camera, world.collision, atmosphere.flashlight, audio, () => {
+    ended = true; active = player.active = false; player.resetInput(); audio.setActive(false);
+    collection.update(0, false); menu.hidden = hud.hidden = true; gameOver.hidden = false;
+    if (document.pointerLockElement) document.exitPointerLock();
+    document.querySelector('#restart').focus();
+  });
+  document.querySelector('#restart').addEventListener('click', () => window.location.reload());
   const location = document.querySelector('#location');
   const compass = document.querySelector('#compass');
   const torchStatus = document.querySelector('#flashlight-state');
 
   function pause() {
+    if (ended) return;
     active = player.active = false; player.resetInput(); audio.setActive(false);
     collection.update(0, false);
     menu.hidden = false; hud.hidden = true;
@@ -51,7 +62,7 @@ try {
     } catch { message.textContent = 'Não foi possível capturar o mouse. Clique novamente para entrar.'; audio.setActive(false); }
   });
   document.addEventListener('pointerlockchange', () => {
-    if (document.pointerLockElement === canvas) {
+    if (document.pointerLockElement === canvas && !ended) {
       started = active = player.active = true; player.resetInput(); menu.hidden = true; hud.hidden = false;
       audio.setActive(true); previous = performance.now();
     } else pause();
@@ -86,6 +97,7 @@ try {
       else { camera.position.set(8, 2.5, 23); camera.lookAt(0, 3, 0); }
       atmosphere.update(elapsed);
       collection.update(dt, active);
+      monster.update(dt, active, player, inventory.count);
       if (active) {
         audio.step(player.distance, player.moving);
         location.textContent = locationAt(player.position);

@@ -41,6 +41,8 @@ kbd { font: inherit; font-size: 9px; border: 1px solid #ffffff28; border-radius:
 #flashlight-state kbd { margin-left: 9px; }
 .controls { position: absolute; bottom: 22px; width: 100%; display: flex; justify-content: center; gap: 23px; color: #8a9c94; font-size: 9px; }
 noscript { position: fixed; inset: 40%; color: white; background: black; }
+#game-over { position: fixed; inset: 0; background: #080e10f2; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px; }
+#game-over h2 { font-family: 'Barlow Condensed', Impact, sans-serif; font-size: clamp(36px, 6vw, 70px); font-weight: 500; color: #c2b695; margin: 15px 0 35px; }
 .collection-progress { position: absolute; top: 105px; left: 38px; }
 #collection-count { font-size: 20px; margin: 7px 0; color: #c5c1ae; }
 #interaction-prompt { position: absolute; top: calc(50% + 25px); left: 50%; transform: translateX(-50%); text-align: center; font-size: 11px; color: #d1c9ad; }

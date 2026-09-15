@@ -1,6 +1,6 @@
 # A Última Noite
 
-Jogo de terror 3D em primeira pessoa para navegador. Você está em uma floresta isolada durante a noite. A segunda etapa adiciona exploração e coleta de cinco objetos, com inventário em memória. Ainda não há inimigo ou condição de vitória.
+Jogo de terror 3D em primeira pessoa para navegador. Você está em uma floresta isolada durante a noite. Explore, encontre os cinco objetos e observe o Homem da Árvore: inicialmente uma presença imóvel, ele passa a caçar após a coleta completa e uma escalada gradual. Há Game Over e reinício, mas ainda não há vitória ou saída definitiva.
 
 ## Executar no computador
 
@@ -38,7 +38,7 @@ A câmera permanece em primeira pessoa. A escada da casa na árvore é percorrid
 - Trilhas de terra, placas de orientação, lua, neblina, sombras e partículas discretas.
 - Lanterna sem consumo de bateria nesta fase; vento e passos suaves gerados com Web Audio.
 
-As caixas e os móveis são cenário. Os cinco objetos coletáveis são modelos próprios, com tons discretos e sem brilho artificial. Não existem monstro, perseguição, sustos, Game Over ou final de vitória.
+As caixas e os móveis são cenário. Os cinco objetos coletáveis são modelos próprios, com tons discretos e sem brilho artificial. A coleta foi preservada na etapa do monstro, sem alterar posições ou controles.
 
 ## Exploração e coleta — etapa 2
 
@@ -52,9 +52,59 @@ Olhe diretamente para um objeto e aproxime-se a até **2,2 metros da câmera**. 
 | Amuleto estranho | Pequeno suporte de pedra no recanto da floresta, além da trilha atrás do galpão | Evento sobrenatural |
 | Mapa antigo | Mesa no cômodo dos fundos da casa principal | Revelar a saída |
 
-Não é possível coletar de longe, olhando para outra direção, através de paredes, enquanto o jogo está pausado ou repetindo a tecla segurada. Cada objeto só pode ser coletado uma vez. Chegar a **5/5 não encerra a partida**: você continua explorando.
+Não é possível coletar de longe, olhando para outra direção, através de paredes, enquanto o jogo está pausado ou repetindo a tecla segurada. Cada objeto só pode ser coletado uma vez. Chegar a **5/5 não encerra a partida**: inicia a transição gradual para a caçada descrita abaixo.
 
 O inventário oferece `add(id)`, `has(id)`, `get(id)`, `list()`, `count` e `total`, com metadados separados dos modelos 3D. Isso prepara descrições, interface e ações futuras sem implementá-las agora. Não há tecla para abrir uma tela de inventário nesta etapa. Os itens persistem durante pausa/retomada, mas reiniciam ao recarregar a página.
+
+## Homem da Árvore — aparições e caçada
+
+Uma única figura de aproximadamente 3,7 metros é reutilizada: corpo fino, membros alongados, dedos compridos, cabeça inclinada, pele cinza, cabelo escuro cobrindo o rosto e roupas velhas. Não há olhos emissivos ou luz exclusiva. É um modelo procedural provisório, com animação simples de membros para caminhada/corrida. A versão cinematográfica do modelo e a reformulação do cenário ficam para etapas futuras.
+
+### Presença durante a exploração
+
+O sistema valida **59 pontos em 10 regiões** contra as colisões atuais. Regiões: mata norte, leste e oeste, final da trilha, fundos da casa, lateral escura da casa, galpão, duas regiões próximas da casa na árvore e trilha sul. Pontos ocupados são descartados; terreno e prédios não são alterados.
+
+| Aparição | Distância ao jogador | Cena |
+| --- | --- | --- |
+| 1 | 42–75 m | Silhueta distante, liberada após 25 segundos de jogo e exploração perto da casa |
+| 2 | 34–60 m | Observador junto das trilhas ou mata |
+| 3 | 25–45 m | Presença perto da casa na árvore |
+| 4 | 15–30 m | Presença do lado de fora da casa, que desaparece ao receber o feixe da lanterna |
+| 5 | 10–20 m | Presença atrás do jogador, fora de sua visão |
+
+As distâncias foram adaptadas ao mapa preservado (raio de 57 m) e à neblina existente. Não seria possível garantir 80–100 m perto da casa sem ampliar o cenário. Os intervalos são limites de elegibilidade, não aparições forçadas: o sistema espera por distância, espaço livre, linha de visão potencial e posição fora do campo de visão. Nem toda sessão necessariamente exibirá as cinco cenas antes de completar a coleta.
+
+Cada região é usada no máximo uma vez nesta fase, com **75 segundos de intervalo mínimo** após um desaparecimento. A figura fica imóvel, com orientação definida apenas ao surgir. Ao desviar o olhar por 0,6 segundo após vê-la, ela pode desaparecer; a próxima cena usa outra região e outra faixa de distância. Nunca há teleporte visível. Se o desaparecimento ocorrer enquanto ela está visível (aproximação, lanterna na cena da casa ou longa observação), há um desvanecimento de 0,9 segundo. Aparições não vistas expiram. Pausa e perda de foco congelam os temporizadores.
+
+### Depois de 5/5
+
+1. Transição de **10 segundos**, com ruído grave discreto e desaparecimento gradual de uma presença anterior.
+2. Aparição a **25–45 m**, imóvel por 4 segundos, seguida de desvanecimento.
+3. Intervalo de **8 segundos**.
+4. Nova aparição em outra região a **20–35 m**, inicialmente parada por 3 segundos.
+5. Caminhada lenta por **8 segundos**.
+6. Caçada contínua, sem novos teleportes.
+
+Os pontos dessas duas aparições também precisam estar fora de vista e livres, portanto a espera pode ser maior. A coleta não dispara corrida ou captura imediata.
+
+### Perseguição, esconderijos e Game Over
+
+- Velocidade de caçada: **4,1 m/s**, entre a caminhada do jogador (3,25) e sua corrida (5,8). A aproximação inicial usa 1,5 m/s.
+- Navegação A* em grade de 0,65 m, com colisões, verificações dos segmentos e limite de busca. Não usa uma trajetória direta atravessando paredes quando não encontra rota.
+- O monstro enxerga com linha de visão até 38 m. Corrida próxima pode ser ouvida até 11 m. Após perder o contato, investiga a última posição conhecida; em 12 segundos sem novo contato, perde o rastro e para até detectar o jogador novamente.
+- Pode entrar pela porta da casa/galpão. Usa uma pose compacta simplificada sob os tetos baixos para caber nas passagens; estar dentro de uma casa não apaga o monstro nem garante segurança.
+- **Limite atual:** navegação no solo. Se o jogador estiver na casa na árvore, investiga a base da escada; ainda não sobe escadas. Não captura através do piso. Esse comportamento é provisório, sem uma regra geral de casas seguras.
+- Captura somente na fase de caçada, a menos de 0,85 m, no nível do solo e sem parede entre os personagens. Aparece **VOCÊ FOI ENCONTRADO**, com botão **Recomeçar**.
+- Recomeçar recarrega a página: jogador, cinco objetos, inventário, lanterna, timers, histórico e monstro são recriados. Não há salvamento entre partidas.
+- Áudio reutiliza o Web Audio existente e respeita a opção de som. Não há picos de jumpscare, combate, armas, diálogos, vitória ou final.
+
+### Arquitetura e validação do monstro
+
+`monster.js` cuida apenas do modelo/pose; `monsterAppearances.js` controla as cenas e percepção da câmera; `monsterAI.js` coordena a transição, detecção e captura; `monsterNavigation.js` calcula rotas. A coleta continua separada, sem alterações: o coordenador apenas lê `inventory.count`. A busca de pontos ocorre no máximo uma vez por segundo e a percepção das aparições a aproximadamente 10 Hz. Na caçada, a visão é amostrada a cada 0,35 s e as rotas no máximo a cada 1,2 s.
+
+**Resultado da validação:** 32 testes passaram (os 18 anteriores e 14 do monstro), build de produção e verificação de assets/sintaxe aprovados. O servidor local respondeu HTTP 200 para a página e os quatro módulos do monstro. Os testes verificam temporizadores, olhar/desviar, lanterna, pontos reais, colisão, elegibilidade das cinco cenas, gatilho 5/5, escalada, entrada na casa, perda de contato, captura, reinicialização de uma sessão e preservação da coleta.
+
+**Validação visual limitada porque o ambiente de teste está com WebGL desabilitado.** O modelo, as animações, o áudio e a jogabilidade precisam de conferência visual em navegador com WebGL 2. Os testes usam as geometrias/colisões Three.js reais na CPU, e o build verifica os módulos sem depender de GPU.
 
 ## Build de produção
 
@@ -114,6 +164,11 @@ Three.js é instalado pelo npm e incorporado ao build, sem CDN em tempo de execu
 | `src/collectibles.js` | Catálogo, modelos dos cinco itens e pequenos suportes |
 | `src/inventory.js` | Inventário em memória, metadados e proteção contra duplicatas |
 | `src/interaction.js` | Mira, distância, oclusão, tecla E e feedback da coleta |
+| `src/monster.js` | Modelo provisório reutilizável e poses |
+| `src/monsterAppearances.js` | Aparições, campo de visão e pontos válidos |
+| `src/monsterAI.js` | Escalada após 5/5, detecção e captura |
+| `src/monsterNavigation.js` | Rotas no solo com A* e colisões |
+| `tests/monster.test.js` | Testes do monstro e integração com o mapa/coleta |
 | `src/styles.css` | Interface e ajustes de tela |
 | `tests/` | Testes automatizados de colisão e movimento |
 | `public/favicon.svg` | Ícone do projeto |
@@ -145,6 +200,9 @@ Os testes cobrem paredes, passagem pelas portas, deslizamento nas paredes, árvo
 8. Testar som desligado e qualidade Leve.
 9. Encontrar os cinco objetos da tabela; olhar para cada um e usar E. Confirmar desaparecimento, mensagem e sequência de 0/5 até 5/5.
 10. Verificar que E não funciona de longe, por trás de uma parede ou em pausa. Ao retomar, os itens já coletados continuam no inventário; em 5/5 a exploração continua.
+11. Antes de 5/5, explorar perto da casa, trilhas e casa na árvore, observar as silhuetas e desviar a câmera; verificar intervalos e ausência de teleporte visível.
+12. Após 5/5, conferir a sequência de tensão, duas aparições, caminhada e caçada; correr para fugir, entrar na casa e quebrar a linha de visão.
+13. Ser alcançado durante a caçada, clicar em Recomeçar e conferir posição inicial, 0/5, cinco objetos novamente presentes e ausência de caçada imediata.
 
 ## Decisões e limites da base
 
