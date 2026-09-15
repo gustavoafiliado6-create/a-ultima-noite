@@ -46,7 +46,38 @@ npm run build
 npm run preview
 ```
 
-O build gera `dist/`. Abra o endereço exibido pelo preview (normalmente `http://127.0.0.1:4173`). Para hospedar, publique **o conteúdo de `dist/`** em um servidor estático HTTP/HTTPS. O projeto usa caminhos relativos, inclusive para hospedagem em uma subpasta. Não precisa de backend. O repositório por si só não ativa hospedagem ou GitHub Pages.
+O build gera `dist/`. Abra o endereço exibido pelo preview (normalmente `http://127.0.0.1:4173`). O preview serve apenas para teste local, não como servidor público de produção. O projeto usa `base: './'` no Vite: os assets ficam relativos ao HTML e funcionam em `/a-ultima-noite/`, sem backend. Three.js é empacotado junto com o jogo.
+
+## Publicação automática no GitHub Pages
+
+**Endereço previsto após a primeira publicação bem-sucedida:**
+[https://gustavoafiliado6-create.github.io/a-ultima-noite/](https://gustavoafiliado6-create.github.io/a-ultima-noite/)
+
+O workflow `.github/workflows/deploy.yml` roda em cada push na branch `main` e também permite execução manual. Ele usa Node.js 22, instala com `npm ci`, executa os testes, compila, verifica os caminhos do build e envia somente `dist/` como artefato. O job de publicação só executa após o build passar e usa o ambiente `github-pages`. Nenhum token pessoal ou serviço pago adicional é necessário. O token temporário do workflow tem leitura do código; apenas o job de deploy recebe `pages: write` e `id-token: write`.
+
+### Ativação inicial pelo proprietário
+
+1. Abra o repositório no GitHub e clique em **Settings → Pages**.
+2. Em **Build and deployment → Source**, selecione **GitHub Actions**. Não escolha a publicação por branch e não crie outro workflow pelo assistente.
+3. Abra **Actions → Publicar jogo no GitHub Pages → Run workflow**.
+4. Selecione a branch **main** e clique no botão verde **Run workflow**.
+5. Aguarde os jobs **Testar e compilar** e **Publicar** ficarem verdes. O link público aparece no resumo do deploy e em **Settings → Pages → Visit site**.
+
+Essa ativação é necessária se Pages ainda não estiver habilitado. A conexão utilizada para editar o repositório não oferece uma operação administrativa para mudar a fonte do Pages. A existência do workflow, sozinha, não comprova que o site já está online. Se o primeiro workflow falhar por Pages não habilitado, ative a fonte acima e use **Run workflow** novamente. Após isso, os próximos pushes em `main` publicam automaticamente.
+
+Se Actions estiver desabilitado, em **Settings → Actions → General → Actions permissions** permita os workflows conforme a política da sua conta. Se houver aprovação pendente do ambiente, abra a execução em **Actions** e use **Review deployments** somente se você autorizar a publicação. Não é necessário desativar proteções existentes.
+
+### Verificar o artefato antes de publicar
+
+```bash
+npm test
+npm run build
+node scripts/check-build.js
+```
+
+O verificador confirma que os arquivos citados pelo HTML existem, que seus URLs resolvem dentro de `/a-ultima-noite/`, que não sobram referências a `/src/` ou imports externos de Three.js e que o JavaScript gerado passa na verificação de sintaxe. Não substitui uma sessão interativa no navegador. O aviso do Vite sobre bundle acima de 500 kB é informativo: o Three.js está incluído nele.
+
+Documentação oficial: [workflows do GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages) e [publicação de projetos Vite](https://vite.dev/guide/static-deploy.html#github-pages).
 
 Three.js é instalado pelo npm e incorporado ao build, sem CDN em tempo de execução. Modelos, texturas e sons são gerados localmente. As fontes opcionais vêm do Google Fonts e possuem fontes alternativas do sistema; o jogo continua funcionando se esse serviço estiver indisponível.
 
@@ -66,6 +97,8 @@ Three.js é instalado pelo npm e incorporado ao build, sem CDN em tempo de execu
 | `src/styles.css` | Interface e ajustes de tela |
 | `tests/` | Testes automatizados de colisão e movimento |
 | `public/favicon.svg` | Ícone do projeto |
+| `.github/workflows/deploy.yml` | Testes, build e publicação automática no Pages |
+| `scripts/check-build.js` | Validação dos assets e sintaxe do build |
 
 ## Verificação
 
