@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1112" />
+    <meta name="description" content="A Última Noite — um jogo de exploração e terror em primeira pessoa." />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>A Última Noite</title>
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <canvas id="game" aria-label="Cenário 3D da floresta"></canvas>
+    <div class="vignette" aria-hidden="true"></div>
+    <main id="menu">
+      <header><span class="brand-mark">☾</span> ESTÚDIO DA NOITE <span class="edition">EXPERIÊNCIA 001</span></header>
+      <section class="menu-content">
+        <p class="eyebrow"><span></span> TERROR EM PRIMEIRA PESSOA</p>
+        <h1>A ÚLTIMA<br /><em>NOITE</em><span class="title-period">.</span></h1>
+        <p class="intro">A floresta está em silêncio.<br />Talvez seja melhor continuar andando.</p>
+        <button id="start" disabled><span id="start-label">Preparando a floresta…</span><span aria-hidden="true">↗</span></button>
+        <p id="message" role="status">Carregando o cenário 3D.</p>
+        <div class="settings">
+          <label><input type="checkbox" id="sound" checked /> Som ambiente</label>
+          <label>Qualidade <select id="quality"><option value="high">Alta</option><option value="low">Leve</option></select></label>
+        </div>
+      </section>
+      <footer><span>FLORESTA ISOLADA <i> / </i> 02:17 AM</span><span>BASE EXPLORÁVEL <i> / </i> V0.1</span></footer>
+    </main>
+    <aside id="hud" hidden>
+      <div class="hud-top"><span class="chapter">A ÚLTIMA NOITE <small>EXPLORAÇÃO LIVRE</small></span><span id="compass">N</span><span class="time">02:17 <small>AM</small></span></div>
+      <span class="crosshair" aria-hidden="true"></span>
+      <div class="hud-bottom"><div><span class="eyebrow">VOCÊ ESTÁ EM</span><p id="location">Trilha de entrada</p></div><span id="flashlight-state">◉ &nbsp; LANTERNA ACESA <kbd>F</kbd></span></div>
+      <div class="controls"><span><kbd>W A S D</kbd> mover</span><span><kbd>MOUSE</kbd> olhar</span><span><kbd>SHIFT</kbd> correr</span><span><kbd>ESC</kbd> pausar</span></div>
+    </aside>
+    <noscript>Ative o JavaScript para jogar A Última Noite.</noscript>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>

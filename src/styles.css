@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root { color-scheme: dark; font-family: 'DM Sans', sans-serif; color: #edece4; background: #0b1112; }
+* { box-sizing: border-box; }
+body { margin: 0; overflow: hidden; }
+#game { display: block; width: 100vw; height: 100vh; }
+.vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 32%, #02070888 100%); }
+#menu { position: fixed; inset: 0; background: linear-gradient(90deg, #060c10eb 0%, #060c10b8 35%, #060c1020 75%); padding: 34px 5.4vw 28px; display: flex; flex-direction: column; }
+[hidden] { display: none !important; }
+header { display: flex; align-items: center; gap: 11px; font-size: 10px; letter-spacing: 2.4px; color: #b2bdb9; }
+.brand-mark { font-size: 28px; color: #c2b18e; }
+.edition { margin-left: auto; font-size: 9px; color: #92a4a0; }
+.menu-content { margin: auto 0; max-width: 480px; }
+.eyebrow { font-size: 9px; font-weight: 600; letter-spacing: 2.5px; color: #b5a17c; }
+.eyebrow span { display: inline-block; width: 20px; height: 1px; margin: 0 9px 3px 0; background: #b5a17c; }
+h1 { font-family: 'Barlow Condensed', Impact, sans-serif; font-size: clamp(70px, 8.6vw, 138px); font-weight: 600; letter-spacing: -1px; line-height: .86; margin: 28px 0; }
+h1 em { font-style: normal; color: #b6aa8b; }
+.title-period { color: #8f4637; }
+.intro { color: #a5b0af; line-height: 1.8; font-size: 13px; margin-bottom: 30px; }
+button { font: inherit; border: 1px solid #bbae8b; color: #101818; background: #c2b695; cursor: pointer; padding: 17px 22px; width: 294px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; transition: background .2s; }
+button:hover { background: #e0d3b0; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid #f3eacb; outline-offset: 5px; }
+button:disabled { opacity: .6; cursor: wait; }
+#message { font-size: 10px; color: #83918e; max-width: 350px; line-height: 1.6; min-height: 16px; }
+.settings { display: flex; align-items: center; gap: 24px; margin-top: 25px; font-size: 10px; color: #9faba8; }
+.settings label { display: flex; align-items: center; gap: 7px; }
+input { accent-color: #bbae8b; }
+select { font: inherit; color: #bbae8b; background: #111b1c; border: 1px solid #ffffff20; padding: 5px; }
+footer { display: flex; justify-content: space-between; border-top: 1px solid #ffffff17; padding-top: 19px; font-size: 8px; letter-spacing: 1.5px; color: #748682; }
+footer i { font-style: normal; padding: 0 9px; color: #b5a17c; }
+#hud { position: fixed; inset: 0; pointer-events: none; text-shadow: 0 2px 6px #000; }
+.hud-top { display: flex; justify-content: space-between; align-items: start; padding: 30px 38px; font-size: 12px; letter-spacing: 2px; }
+.chapter small { display: block; font-size: 8px; letter-spacing: 2px; margin-top: 8px; color: #8d9d99; }
+#compass { position: absolute; left: 50%; transform: translateX(-50%); border-top: 1px solid #b7ad8a; padding: 10px 24px; font-size: 10px; color: #cac4b0; }
+.time { color: #bac1b7; }.time small { font-size: 8px; }
+.crosshair { position: absolute; left: 50%; top: 50%; width: 3px; height: 3px; border-radius: 50%; background: #e6e3cf99; }
+.hud-bottom { position: absolute; bottom: 68px; left: 38px; right: 38px; display: flex; justify-content: space-between; align-items: end; }
+#location { font-size: 16px; margin: 8px 0 0; }
+#flashlight-state { color: #bbb69e; font-size: 9px; letter-spacing: 1.2px; }
+kbd { font: inherit; font-size: 9px; border: 1px solid #ffffff28; border-radius: 2px; padding: 4px 6px; margin-right: 5px; color: #c5cabe; }
+#flashlight-state kbd { margin-left: 9px; }
+.controls { position: absolute; bottom: 22px; width: 100%; display: flex; justify-content: center; gap: 23px; color: #8a9c94; font-size: 9px; }
+noscript { position: fixed; inset: 40%; color: white; background: black; }
+@media (max-width: 650px) { #menu { padding: 22px; } h1 { font-size: 80px; } .edition { display: none; } footer { font-size: 7px; } .hud-top { padding: 22px; } .hud-bottom { left: 22px; right: 22px; } .controls { gap: 8px; } }
+@media (max-height: 650px) { h1 { font-size: 76px; margin: 18px 0; }.settings { margin-top: 10px; }.intro { margin-bottom: 16px; } #menu { padding-top: 15px; padding-bottom: 15px; } }
