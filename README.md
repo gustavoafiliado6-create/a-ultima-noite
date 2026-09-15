@@ -60,25 +60,40 @@ O inventário oferece `add(id)`, `has(id)`, `get(id)`, `list()`, `count` e `tota
 
 Uma única figura de aproximadamente 3,7 metros é reutilizada: corpo fino, membros alongados, dedos compridos, cabeça inclinada, pele cinza, cabelo escuro cobrindo o rosto e roupas velhas. Não há olhos emissivos ou luz exclusiva. É um modelo procedural provisório, com animação simples de membros para caminhada/corrida. A versão cinematográfica do modelo e a reformulação do cenário ficam para etapas futuras.
 
-### Presença durante a exploração
+### Diretor de terror: exploração desde 0/5
 
-O sistema valida **59 pontos em 10 regiões** contra as colisões atuais. Regiões: mata norte, leste e oeste, final da trilha, fundos da casa, lateral escura da casa, galpão, duas regiões próximas da casa na árvore e trilha sul. Pontos ocupados são descartados; terreno e prédios não são alterados.
+`terrorEvents.js` define **25 tipos de eventos**, com tipo, intensidade, peso de seleção, cooldown, faixa de distância, intervalo de coleta, local, interior/exterior, duração e repetibilidade. `terrorManager.js` seleciona eventos sem repetir o anterior, respeita cooldown individual e global e conserva um histórico limitado a 64 registros. A intensidade (0–100) combina tempo, coleta, oscilação de tensão e presença ativa; influencia os pesos, sem uma sequência fixa.
 
-| Aparição | Distância ao jogador | Cena |
+O primeiro evento é elegível aos 12 segundos; aparições a partir de 28 segundos. Os intervalos globais variam entre 9–21 segundos mais duração no início e 5–17 segundos mais duração em 4/5. Uma aparição bloqueia outros eventos até desaparecer. Figuras têm intervalo adicional de 38–62 segundos no início, reduzido conforme a coleta. Locais inválidos são ignorados, com nova tentativa após três segundos; nunca se força uma figura na frente da câmera. Não há mais limite de cinco aparições durante a exploração.
+
+**18 eventos ambientais:** galho, passos, corrida nas folhas, folhas, árvore rangendo, batida na casa, arranhão, janela chacoalhando, objeto caindo, ruído no galpão, madeira da casa na árvore, respiração distante, respiração próxima, sussurro, estática do rádio, silêncio, falha breve da lanterna e trovão/relâmpago. Batidas, janela e objeto caindo são sugestões sonoras: não movimentam os móveis ou as construções. O rádio emite estática apenas enquanto seu modelo ainda está no mundo; não reproduz diálogos.
+
+**Sete aparições:** observador na mata, figura na casa, figura no galpão, figura perto da casa na árvore, presença atrás, vislumbre breve e figura revelada por relâmpago. Reutilizam o mesmo modelo. Usam os 59 pontos externos originais e candidatos adicionais na porta/cômodo da casa e interior do galpão, descartados quando ocupados. Interiores usam a pose compacta já existente; a casa na árvore usa pontos no solo ao redor, sem bloquear a escada.
+
+| Coleta | Faixa habitual das figuras | Progressão |
 | --- | --- | --- |
-| 1 | 42–75 m | Silhueta distante, liberada após 25 segundos de jogo e exploração perto da casa |
-| 2 | 34–60 m | Observador junto das trilhas ou mata |
-| 3 | 25–45 m | Presença perto da casa na árvore |
-| 4 | 15–30 m | Presença do lado de fora da casa, que desaparece ao receber o feixe da lanterna |
-| 5 | 10–20 m | Presença atrás do jogador, fora de sua visão |
+| 0/5 | 42–75 m | Sons ambientais e observador distante |
+| 1/5 | 34–65 m | Corrida nas folhas, rádio, árvore-casa |
+| 2/5 | 25–50 m | Casa, galpão, vislumbres, sussurro e falha de luz |
+| 3/5 | 15–35 m | Respiração próxima e figura atrás (10–20 m) |
+| 4/5 | 10–25 m | Intervalos menores, mantendo pausas e aparições distantes possíveis |
+| 5/5 | Preparação → caçada | Suspende os eventos aleatórios e inicia a sequência abaixo |
 
-As distâncias foram adaptadas ao mapa preservado (raio de 57 m) e à neblina existente. Não seria possível garantir 80–100 m perto da casa sem ampliar o cenário. Os intervalos são limites de elegibilidade, não aparições forçadas: o sistema espera por distância, espaço livre, linha de visão potencial e posição fora do campo de visão. Nem toda sessão necessariamente exibirá as cinco cenas antes de completar a coleta.
+A primeira figura usa a faixa distante; depois há 22% de possibilidade de voltar a essa faixa. Distâncias são elegibilidade, não garantia: o mapa preservado tem raio de 57 m e não permite garantir 80–100 m próximo da casa. Não se ampliou o mapa para forçar esses números.
 
-Cada região é usada no máximo uma vez nesta fase, com **75 segundos de intervalo mínimo** após um desaparecimento. A figura fica imóvel, com orientação definida apenas ao surgir. Ao desviar o olhar por 0,6 segundo após vê-la, ela pode desaparecer; a próxima cena usa outra região e outra faixa de distância. Nunca há teleporte visível. Se o desaparecimento ocorrer enquanto ela está visível (aproximação, lanterna na cena da casa ou longa observação), há um desvanecimento de 0,9 segundo. Aparições não vistas expiram. Pausa e perda de foco congelam os temporizadores.
+A figura fica imóvel sob observação. Após ser vista, desaparece quando fica fora de visão por 0,4 segundo; futuras aparições escolhem outras regiões, evitando as duas últimas. Enquanto visível, desaparecimentos usam desvanecimento de 0,4 segundo. Vislumbres duram aproximadamente 1,2–1,6 segundo após serem vistos. A lanterna dissipa a figura da casa. Figuras não vistas expiram em até 28 segundos. Não há teleporte visível ou patrulha. Relâmpagos são flashes pontuais, sem mudança permanente da iluminação ou sistema de tempestade. F continua controlando a lanterna durante sua falha temporária.
+
+### Áudio espacial
+
+`monsterAudio.js` fornece **15 famílias procedurais**: galho, sequência de passos, corrida, folhas, rangido, batida, arranhão, chocalho, impacto, respiração, respiração pesada, sussurro, estática, trovão e passo individual. São ruídos filtrados com envelopes, impulsos e variações de frequência/volume; respiração e sussurro são aproximações provisórias, não vozes gravadas.
+
+Cada som usa `PannerNode` HRTF, posição 3D e atenuação inversa por distância (referência 7 m, rolloff 1,25). O ouvinte acompanha posição e orientação da câmera a cerca de 16 Hz. Fontes de construções usam coordenadas reais; fontes na mata e atrás são validadas contra colisões. Passos de perseguição são emitidos na posição física do monstro; respiração é espaçada e muda na caçada. Há no máximo quatro vozes simultâneas e desconexão ao terminar. Pausa e opção de som interrompem as vozes. O impacto final é curto e respeita som desativado. HRTF depende do navegador e dos fones; não há simulação acústica de propagação através das paredes.
+
+Não existem arquivos de áudio externos. Para substituir uma família por gravação, coloque, por exemplo, `public/audio/breath.ogg`, `heavy.ogg`, `step.ogg`, `branch.ogg`, `creak.ogg`, `whisper.ogg` ou `thunder.ogg`, e chame `monster.sound.loadAsset('breath', './audio/breath.ogg')` após iniciar o contexto de áudio. O caminho relativo funciona no Pages. Carregamento inválido retorna `false` e mantém o som procedural; nenhum desses arquivos é obrigatório ou requisitado atualmente. Use gravações próprias ou licenciadas.
 
 ### Depois de 5/5
 
-1. Transição de **10 segundos**, com ruído grave discreto e desaparecimento gradual de uma presença anterior.
+1. Transição de **10 segundos**: cinco segundos com vento drasticamente reduzido e eventos suspensos; depois um trovão distante e recuperação gradual do ambiente. Uma presença anterior desvanece.
 2. Aparição a **25–45 m**, imóvel por 4 segundos, seguida de desvanecimento.
 3. Intervalo de **8 segundos**.
 4. Nova aparição em outra região a **20–35 m**, inicialmente parada por 3 segundos.
@@ -89,20 +104,21 @@ Os pontos dessas duas aparições também precisam estar fora de vista e livres,
 
 ### Perseguição, esconderijos e Game Over
 
+- O olhar direto com linha de visão imobiliza o monstro, inclusive na caçada; ao desviar, ele retoma a rota física. Não teleporta durante a perseguição.
 - Velocidade de caçada: **4,1 m/s**, entre a caminhada do jogador (3,25) e sua corrida (5,8). A aproximação inicial usa 1,5 m/s.
 - Navegação A* em grade de 0,65 m, com colisões, verificações dos segmentos e limite de busca. Não usa uma trajetória direta atravessando paredes quando não encontra rota.
 - O monstro enxerga com linha de visão até 38 m. Corrida próxima pode ser ouvida até 11 m. Após perder o contato, investiga a última posição conhecida; em 12 segundos sem novo contato, perde o rastro e para até detectar o jogador novamente.
 - Pode entrar pela porta da casa/galpão. Usa uma pose compacta simplificada sob os tetos baixos para caber nas passagens; estar dentro de uma casa não apaga o monstro nem garante segurança.
 - **Limite atual:** navegação no solo. Se o jogador estiver na casa na árvore, investiga a base da escada; ainda não sobe escadas. Não captura através do piso. Esse comportamento é provisório, sem uma regra geral de casas seguras.
-- Captura somente na fase de caçada, a menos de 0,85 m, no nível do solo e sem parede entre os personagens. Aparece **VOCÊ FOI ENCONTRADO**, com botão **Recomeçar**.
+- Captura somente na fase de caçada, a menos de 0,85 m, no nível do solo e sem parede entre os personagens. Aparece **VOCÊ FOI ENCONTRADO**, com botão **TENTAR NOVAMENTE**.
 - Recomeçar recarrega a página: jogador, cinco objetos, inventário, lanterna, timers, histórico e monstro são recriados. Não há salvamento entre partidas.
 - Áudio reutiliza o Web Audio existente e respeita a opção de som. Não há picos de jumpscare, combate, armas, diálogos, vitória ou final.
 
 ### Arquitetura e validação do monstro
 
-`monster.js` cuida apenas do modelo/pose; `monsterAppearances.js` controla as cenas e percepção da câmera; `monsterAI.js` coordena a transição, detecção e captura; `monsterNavigation.js` calcula rotas. A coleta continua separada, sem alterações: o coordenador apenas lê `inventory.count`. A busca de pontos ocorre no máximo uma vez por segundo e a percepção das aparições a aproximadamente 10 Hz. Na caçada, a visão é amostrada a cada 0,35 s e as rotas no máximo a cada 1,2 s.
+`monster.js` mantém o modelo/pose; `monsterAppearances.js` fornece pontos e percepção; `terrorEvents.js` contém o catálogo; `terrorManager.js` controla ritmo e efeitos; `monsterAudio.js` cuida do áudio espacial; `monsterAI.js` coordena escalada e captura; `monsterNavigation.js` mantém as rotas. A coleta continua separada. A seleção usa tentativas limitadas; percepção de figuras e olhar na caçada funcionam a 10 Hz. Visão da IA a cada 0,35 s e rotas a cada 1,2 s. O antigo `AppearanceDirector` permanece como controlador de cenas legadas testado, mas a exploração normal usa `TerrorDirector`.
 
-**Resultado da validação:** 32 testes passaram (os 18 anteriores e 14 do monstro), build de produção e verificação de assets/sintaxe aprovados. O servidor local respondeu HTTP 200 para a página e os quatro módulos do monstro. Os testes verificam temporizadores, olhar/desviar, lanterna, pontos reais, colisão, elegibilidade das cinco cenas, gatilho 5/5, escalada, entrada na casa, perda de contato, captura, reinicialização de uma sessão e preservação da coleta.
+A suíte inclui os 32 testes anteriores e 12 novos: catálogo, cooldowns, repetição, elegibilidade 0–5, pontos interiores, fontes, olhar/desviar, vislumbre, lanterna, transição silenciosa, áudio HRTF/limite/pausa e caçada sob olhar. O build e o verificador validam sintaxe e caminhos relativos.
 
 **Validação visual limitada porque o ambiente de teste está com WebGL desabilitado.** O modelo, as animações, o áudio e a jogabilidade precisam de conferência visual em navegador com WebGL 2. Os testes usam as geometrias/colisões Three.js reais na CPU, e o build verifica os módulos sem depender de GPU.
 
@@ -117,7 +133,7 @@ O build gera `dist/`. Abra o endereço exibido pelo preview (normalmente `http:/
 
 ## Publicação automática no GitHub Pages
 
-**Endereço previsto após a primeira publicação bem-sucedida:**
+**Jogo publicado:**
 [https://gustavoafiliado6-create.github.io/a-ultima-noite/](https://gustavoafiliado6-create.github.io/a-ultima-noite/)
 
 O workflow `.github/workflows/deploy.yml` roda em cada push na branch `main` e também permite execução manual. Ele usa Node.js 22, instala com `npm ci`, executa os testes, compila, verifica os caminhos do build e envia somente `dist/` como artefato. O job de publicação só executa após o build passar e usa o ambiente `github-pages`. Nenhum token pessoal ou serviço pago adicional é necessário. O token temporário do workflow tem leitura do código; apenas o job de deploy recebe `pages: write` e `id-token: write`.
@@ -167,6 +183,10 @@ Three.js é instalado pelo npm e incorporado ao build, sem CDN em tempo de execu
 | `src/monster.js` | Modelo provisório reutilizável e poses |
 | `src/monsterAppearances.js` | Aparições, campo de visão e pontos válidos |
 | `src/monsterAI.js` | Escalada após 5/5, detecção e captura |
+| `src/terrorEvents.js` | Catálogo e progressão dos eventos |
+| `src/terrorManager.js` | Ritmo, seleção contextual, efeitos e aparições |
+| `src/monsterAudio.js` | Sons procedurais, áudio HRTF e carregamento opcional |
+| `tests/terror.test.js` | Regressões do diretor e áudio |
 | `src/monsterNavigation.js` | Rotas no solo com A* e colisões |
 | `tests/monster.test.js` | Testes do monstro e integração com o mapa/coleta |
 | `src/styles.css` | Interface e ajustes de tela |
@@ -200,9 +220,9 @@ Os testes cobrem paredes, passagem pelas portas, deslizamento nas paredes, árvo
 8. Testar som desligado e qualidade Leve.
 9. Encontrar os cinco objetos da tabela; olhar para cada um e usar E. Confirmar desaparecimento, mensagem e sequência de 0/5 até 5/5.
 10. Verificar que E não funciona de longe, por trás de uma parede ou em pausa. Ao retomar, os itens já coletados continuam no inventário; em 5/5 a exploração continua.
-11. Antes de 5/5, explorar perto da casa, trilhas e casa na árvore, observar as silhuetas e desviar a câmera; verificar intervalos e ausência de teleporte visível.
+11. Esperar o primeiro evento sonoro sem coletar itens; conferir esquerda/direita/atrás com fones, silêncio, pausa e som desativado. Antes de 5/5, explorar perto da casa, trilhas e casa na árvore, observar as silhuetas e desviar a câmera; verificar intervalos e ausência de teleporte visível.
 12. Após 5/5, conferir a sequência de tensão, duas aparições, caminhada e caçada; correr para fugir, entrar na casa e quebrar a linha de visão.
-13. Ser alcançado durante a caçada, clicar em Recomeçar e conferir posição inicial, 0/5, cinco objetos novamente presentes e ausência de caçada imediata.
+13. Ser alcançado durante a caçada, clicar em TENTAR NOVAMENTE e conferir posição inicial, 0/5, cinco objetos novamente presentes e ausência de caçada imediata.
 
 ## Decisões e limites da base
 

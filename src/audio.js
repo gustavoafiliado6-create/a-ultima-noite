@@ -14,12 +14,13 @@ export class AmbientAudio {
       this.noise = buffer;
       const source = ctx.createBufferSource(); source.buffer = buffer; source.loop = true;
       const filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 280;
-      const gain = ctx.createGain(); gain.gain.value = .11;
+      const gain = ctx.createGain(); gain.gain.value = .11; this.windGain = gain;
       source.connect(filter).connect(gain).connect(this.master); source.start();
     }
     await this.context.resume(); this.setActive(true);
   }
   setActive(active) { if (this.context) this.master.gain.setTargetAtTime(active && this.enabled ? .32 : 0, this.context.currentTime, .1); }
+  duck(amount) { if (this.context && this.windGain) this.windGain.gain.setTargetAtTime(.11 * amount, this.context.currentTime, .25); }
   presence(kind = 'wind') {
     if (!this.context || !this.enabled || this.context.state !== 'running') return;
     const ctx = this.context, now = ctx.currentTime, duration = kind === 'step' ? .22 : 2.8;

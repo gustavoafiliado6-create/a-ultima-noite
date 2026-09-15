@@ -124,7 +124,7 @@ export class MonsterAppearances {
       return false;
     });
     for (const y of [3.3, 2.5, 1.5]) {
-      const target = new THREE.Vector3(point.x, y, point.z), direction = target.sub(this.eye);
+      const target = new THREE.Vector3(point.x, y * (point.scale ?? 1), point.z), direction = target.sub(this.eye);
       const distance = direction.length(); this.ray.set(this.eye, direction.normalize()); this.ray.far = Math.max(0, distance - .5);
       if (!this.ray.intersectObjects(obstacles, false).length) return true;
     }
@@ -149,7 +149,7 @@ export class MonsterAppearances {
   }
   sense(point) {
     this.refreshCamera();
-    const distance = this.toPoint.set(point.x, 2.7, point.z).sub(this.eye).length();
+    const distance = this.toPoint.set(point.x, 2.7 * (point.scale ?? 1), point.z).sub(this.eye).length();
     const cosine = this.toPoint.normalize().dot(this.forward);
     const visible = this.inView(point) && this.clearSight(point);
     return { distance, visible, direct: visible && cosine > .985,
