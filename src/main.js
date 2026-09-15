@@ -3,6 +3,9 @@ import { createWorld, locationAt } from './world.js';
 import { createAtmosphere } from './atmosphere.js';
 import { Player } from './player.js';
 import { AmbientAudio } from './audio.js';
+import { Inventory } from './inventory.js';
+import { ITEMS, createCollectibles } from './collectibles.js';
+import { CollectionSystem, collectionUI } from './interaction.js';
 
 const canvas = document.querySelector('#game');
 const menu = document.querySelector('#menu');
@@ -22,6 +25,9 @@ try {
   const world = createWorld(scene);
   const player = new Player(camera, world.collision);
   const atmosphere = createAtmosphere(scene, camera);
+  const inventory = new Inventory(ITEMS);
+  const collectibles = createCollectibles(scene, world.collision);
+  const collection = new CollectionSystem(scene, camera, collectibles, inventory, collectionUI());
   const audio = new AmbientAudio();
   let started = false, active = false, elapsed = 0, previous = performance.now();
   const location = document.querySelector('#location');
@@ -30,6 +36,7 @@ try {
 
   function pause() {
     active = player.active = false; player.resetInput(); audio.setActive(false);
+    collection.update(0, false);
     menu.hidden = false; hud.hidden = true;
     label.textContent = started ? 'Continuar a exploração' : 'Entrar na floresta';
     message.textContent = started ? 'Jogo pausado. Clique para continuar.' : 'Use fones de ouvido. Jogue com teclado e mouse.';
@@ -51,6 +58,7 @@ try {
   });
   document.addEventListener('pointerlockerror', () => { pause(); message.textContent = 'Captura do mouse bloqueada. Abra o jogo em uma aba própria e tente novamente.'; });
   document.addEventListener('keydown', event => {
+    collection.handleKey(event, active);
     if (active && event.code === 'KeyF' && !event.repeat) {
       const on = atmosphere.toggle();
       torchStatus.innerHTML = `${on ? '◉ &nbsp; LANTERNA ACESA' : '○ &nbsp; LANTERNA APAGADA'} <kbd>F</kbd>`;
@@ -77,6 +85,7 @@ try {
       if (started) player.update(dt);
       else { camera.position.set(8, 2.5, 23); camera.lookAt(0, 3, 0); }
       atmosphere.update(elapsed);
+      collection.update(dt, active);
       if (active) {
         audio.step(player.distance, player.moving);
         location.textContent = locationAt(player.position);
